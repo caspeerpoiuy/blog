@@ -8,5 +8,6 @@ urlpatterns = [
     url(r"^register/$", views.UserRegisterApiView.as_view()),
     url(r"^login/$", obtain_jwt_token),
     url(r"^refresh/$", refresh_jwt_token),
-    # url(r"^base/(?P<pk>[0-9]+)/$", views.UserApiView.as_view()),
+    url(r"^baseinfo/", views.UserBaseInfoApiView.as_view()),
+    url(r"^code/", views.UserCodeGenerateApiView.as_view())
 ]

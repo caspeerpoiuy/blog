@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-from .models import CommonUser
+from .models import CommonUser, UserCode
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -11,12 +11,17 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         allow_blank=False,
         write_only=True
     )
+    code = serializers.CharField(
+        allow_null=False,
+        allow_blank=False,
+        write_only=True
+    )
 
     token = serializers.CharField(read_only=True)
 
     class Meta:
         model = CommonUser
-        fields = ["id", "username", "password", "confirm_password", "token"]
+        fields = ["id", "username", "password", "confirm_password", "token", "code"]
 
     extra_kwargs = {
         "id": {
@@ -32,7 +37,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "required": True
         },
         "password": {
-            "write_only": True,
             "min_length": 8,
             "max_length": 20,
             "error_message": {
@@ -47,6 +51,17 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             }
     }
 
+    def validate_code(self, value):
+        # try:
+        sql_code = UserCode.objects.get(code=value)
+        if sql_code is None:
+            raise serializers.ValidationError("this code not exists")
+        if sql_code.active is False:
+            raise serializers.ValidationError("the code status error")
+        return value
+        # except Exception as e:
+        #     print(e)
+
     def validate(self, attrs):
         password = attrs.get("password")
         confirm_password = attrs.get("confirm_password")
@@ -57,6 +72,12 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         del validated_data["confirm_password"]
+
+        code = UserCode.objects.get(code=validated_data.get("code"))
+        code.active = False
+        code.save()
+
+        del validated_data["code"]
 
         user = super().create(validated_data)
         user.set_password(validated_data.get("password"))
@@ -69,3 +90,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.token = token
 
         return user
+
+
+class UserBaseInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CommonUser
+        fields = ["id", "username", "avatar_uri"]
+
+
+

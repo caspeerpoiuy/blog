@@ -14,4 +14,10 @@ class CommonUser(AbstractUser):
         db_table = "BlogCommonUser"
 
 
+class UserCode(models.Model):
 
+    code = models.CharField(max_length=64, null=False, unique=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "BlogUserCode"

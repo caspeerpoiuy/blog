@@ -1,11 +1,12 @@
 import logging
-import json
-from rest_framework.permissions import IsAuthenticated
+import uuid
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView
 
-from .models import CommonUser
-from .serializers import UserRegisterSerializer
+from .models import CommonUser, UserCode
+from .serializers import UserRegisterSerializer, UserBaseInfoSerializer
 
 # logger = logging.getLogger(__name__)
 
@@ -30,3 +31,20 @@ class UserRegisterApiView(APIView):
         serializer.save()
         serializer.data.pop("password")
         return Response(serializer.data)
+
+
+class UserBaseInfoApiView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserBaseInfoSerializer
+
+    def get_object(self):
+        return self.request.user
+
+
+class UserCodeGenerateApiView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        code = uuid.uuid1()
+        UserCode.objects.create(code=code)
+        return Response({"code": code})
