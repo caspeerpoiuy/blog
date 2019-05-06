@@ -1,5 +1,6 @@
 import logging
 import uuid
+# from django.core.cache
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -48,3 +49,10 @@ class UserCodeGenerateApiView(APIView):
         code = uuid.uuid1()
         UserCode.objects.create(code=code)
         return Response({"code": code})
+
+
+class AvatarUploadApiView(APIView):
+
+    def post(self, request):
+        a = request.data
+        return Response(a)
