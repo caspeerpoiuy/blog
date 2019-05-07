@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils.timezone import now
 
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 class CommonUser(AbstractUser):
     """
@@ -12,6 +13,7 @@ class CommonUser(AbstractUser):
 
     class Meta:
         db_table = "BlogCommonUser"
+
 
 
 class UserCode(models.Model):

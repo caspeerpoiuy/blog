@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
+from my_blog import settings
+from utils.function import generate_verify_email_url
 from .models import CommonUser, UserCode
 
 
@@ -99,4 +101,29 @@ class UserBaseInfoSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "avatar_uri"]
 
 
+class EmailSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = CommonUser
+        fields = ["id", "email"]
+        extra_kwargs = {
+            "email": {
+                "required": True
+            }
+        }
+
+    def update(self, instance, validated_data):
+        print(instance.id)
+        email = validated_data.get("email")
+        instance.email = email
+        instance.save()
+        subject = "casperblog激活邮件"
+        message = ""
+        from_email = settings.EMAIL_FROM
+        recipient_list = [email, "casperblog@163.com"]
+        verify_url = generate_verify_email_url(instance.id, email)
+        html_message = "<p>casperblog激活邮件</p> "\
+                       "<p><a href='%s'>%s</a></p>" %(email, verify_url)
+        from celery_tasks.email.tasks import send_verify_mail
+        send_verify_mail.delay(subject, message, from_email, recipient_list, html_message)
+        return instance

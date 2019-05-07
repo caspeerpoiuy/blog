@@ -4,10 +4,10 @@ import uuid
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 
 from .models import CommonUser, UserCode
-from .serializers import UserRegisterSerializer, UserBaseInfoSerializer
+from .serializers import UserRegisterSerializer, UserBaseInfoSerializer, EmailSerializer
 
 # logger = logging.getLogger(__name__)
 
@@ -49,6 +49,14 @@ class UserCodeGenerateApiView(APIView):
         code = uuid.uuid1()
         UserCode.objects.create(code=code)
         return Response({"code": code})
+
+
+class EmailApiView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailSerializer
+
+    def get_object(self):
+        return self.request.user
 
 
 class AvatarUploadApiView(APIView):
