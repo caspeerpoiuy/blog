@@ -1,4 +1,5 @@
 from rest_framework.generics import ListAPIView
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 
 from .serializers import CategorySerializer,ArticleSerializer
 from .models import CategoryModel, ArticleModel
@@ -11,6 +12,7 @@ class CategoryApiView(ListAPIView):
 
 class ArticleApiView(ListAPIView):
     serializer_class = ArticleSerializer
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
     def get_queryset(self):
         category_id = self.kwargs.get("category_id")
